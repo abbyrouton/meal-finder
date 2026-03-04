@@ -25,29 +25,28 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: ".next/standalone/,.next/static/,public/"
-          target: "~/meal-finder-deploy"
-          strip_components: 0
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy files
+        run: |
+          rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" \
+            .next/standalone/ \
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/meal-finder-standalone/
+
+          rsync -avz -e "ssh -i ~/.ssh/deploy_key" \
+            .next/static/ \
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/meal-finder-standalone/.next/static/
+
+          rsync -avz -e "ssh -i ~/.ssh/deploy_key" \
+            public/ \
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/meal-finder-standalone/public/
 
       - name: Restart app
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            rm -rf ~/meal-finder-standalone
-            mv ~/meal-finder-deploy/.next/standalone ~/meal-finder-standalone
-            mkdir -p ~/meal-finder-standalone/.next
-            mv ~/meal-finder-deploy/.next/static ~/meal-finder-standalone/.next/static
-            mv ~/meal-finder-deploy/public ~/meal-finder-standalone/public
-            rm -rf ~/meal-finder-deploy
-            cd ~/meal-finder-standalone
-            pm2 restart meal-finder || pm2 start server.js --name meal-finder
-            pm2 save
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
+            "cd ~/meal-finder-standalone && pm2 restart meal-finder || pm2 start server.js --name meal-finder && pm2 save"
