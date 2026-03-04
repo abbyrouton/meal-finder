@@ -8,6 +8,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
 
     steps:
       - name: Checkout code
@@ -30,23 +33,23 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 -d > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
 
       - name: Deploy files
         run: |
           rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" \
             .next/standalone/ \
-            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/meal-finder-standalone/
+            "${SSH_USERNAME}@${SSH_HOST}:~/meal-finder-standalone/"
 
           rsync -avz -e "ssh -i ~/.ssh/deploy_key" \
             .next/static/ \
-            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/meal-finder-standalone/.next/static/
+            "${SSH_USERNAME}@${SSH_HOST}:~/meal-finder-standalone/.next/static/"
 
           rsync -avz -e "ssh -i ~/.ssh/deploy_key" \
             public/ \
-            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/meal-finder-standalone/public/
+            "${SSH_USERNAME}@${SSH_HOST}:~/meal-finder-standalone/public/"
 
       - name: Restart app
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
+          ssh -i ~/.ssh/deploy_key "${SSH_USERNAME}@${SSH_HOST}" \
             "cd ~/meal-finder-standalone && pm2 restart meal-finder || pm2 start server.js --name meal-finder && pm2 save"
