@@ -13,15 +13,40 @@ Meal Finder solves the problem of losing track of recipes from various sources (
 
 ```
 meal-finder/
-├── docs/
-│   └── project-proposal.md   # Full project specification
+├── frontend/           # Next.js frontend app
+│   ├── src/app/        # App router pages and API routes
+│   ├── public/         # Static assets
+│   ├── package.json
+│   └── [config files]
+├── backend/            # Express.js API server
+│   ├── src/
+│   │   ├── index.ts    # Server entry point (port 3001)
+│   │   └── routes/     # API route handlers
+│   ├── package.json
+│   └── tsconfig.json
+├── docs/               # Project documentation
+│   ├── project-proposal.md
+│   ├── architecture.md
+│   └── database-schema.md
+├── .github/workflows/  # CI/CD deployment
+├── package.json        # Root monorepo scripts
 ├── README.md
 └── CLAUDE.md
 ```
 
 ## Development Server
 
-*Project setup not yet initialized.* When set up, development commands will be documented here.
+```bash
+# Install all dependencies
+npm run install:all
+
+# Run both frontend and backend
+npm run dev
+
+# Run individually
+npm run dev:frontend  # http://localhost:3000
+npm run dev:backend   # http://localhost:3001
+```
 
 ## Architectural Decisions
 
@@ -32,11 +57,12 @@ meal-finder/
 - **cuisine_types** - Reference table for consistent cuisine tagging
 
 ### API Design
-- RESTful endpoints under `/api/`
-- Recipes: CRUD at `/api/recipes` and `/api/recipes/[id]`
-- Ratings: Upsert at `/api/recipes/[id]/rating`
-- Search: `/api/recipes/search?q=`
-- Suggestions: `/api/suggestions`
+- Backend (Express.js): RESTful API on port 3001
+  - `/api/health` - Health check
+  - `/api/recipes` - CRUD operations
+- Frontend (Next.js): App on port 3000
+  - Uses Next.js App Router
+  - Will proxy to backend for API calls
 
 ### Pages
 - Authentication: `/login`, `/signup`
