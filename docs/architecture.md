@@ -1,5 +1,29 @@
 # Architecture
 
+## Project Structure
+
+```
+meal-finder/
+├── frontend/           # Next.js frontend app (port 3000)
+│   ├── src/app/        # App router pages
+│   ├── public/         # Static assets
+│   └── package.json
+├── backend/            # Express.js API server (port 3001)
+│   ├── src/
+│   │   ├── index.ts    # Server entry point
+│   │   └── routes/     # API route handlers
+│   └── package.json
+├── docs/               # Project documentation
+└── package.json        # Root monorepo scripts
+```
+
+The project uses a monorepo structure with separate frontend and backend directories:
+- **Frontend**: Next.js with App Router handles UI and page routing
+- **Backend**: Express.js serves the REST API on port 3001
+- **Root**: Contains scripts to run both services concurrently
+
+---
+
 ## Pages
 
 ### Authentication
@@ -72,6 +96,8 @@
 ---
 
 ## API Endpoints
+
+All API endpoints are served by the Express.js backend on port 3001. The frontend proxies requests to the backend during development.
 
 ### Recipes
 

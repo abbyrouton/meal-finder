@@ -30,6 +30,19 @@
 
 ---
 
+## Technical Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js (App Router) in `/frontend` |
+| Backend | Express.js API in `/backend` |
+| Database | Supabase (PostgreSQL) |
+| Authentication | Supabase Auth |
+| Styling | Tailwind CSS |
+| Deployment | GitHub Actions → AWS Lightsail |
+
+---
+
 ## Related Documentation
 
 - [Architecture](./architecture.md) — Pages, navigation flow, and API design
