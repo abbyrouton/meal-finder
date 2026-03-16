@@ -42,6 +42,10 @@ jobs:
             frontend/.next/standalone/ \
             "${SSH_USERNAME}@${SSH_HOST}:~/meal-finder-standalone/"
 
+          # Create .next/static directory since standalone output doesn't include it
+          ssh -i ~/.ssh/deploy_key "${SSH_USERNAME}@${SSH_HOST}" \
+            "mkdir -p ~/meal-finder-standalone/.next/static"
+
           rsync -avz -e "ssh -i ~/.ssh/deploy_key" \
             frontend/.next/static/ \
             "${SSH_USERNAME}@${SSH_HOST}:~/meal-finder-standalone/.next/static/"
