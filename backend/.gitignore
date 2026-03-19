@@ -1,8 +1,6 @@
-# dependencies
-node_modules/
-
-# build output
-dist/
+# Go build output
+server
+*.exe
 
 # env files
 .env
@@ -11,5 +9,6 @@ dist/
 # misc
 .DS_Store
 
-# debug
-npm-debug.log*
+# IDE
+.idea/
+*.swp
