@@ -8,9 +8,9 @@ import (
 	"meal-finder-backend/handlers"
 	"meal-finder-backend/middleware"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -32,14 +32,15 @@ func main() {
 		c.Next()
 	})
 
-	// Get database URL from environment
-	databaseURL := os.Getenv("DATABASE_URL")
+	// Get database DSN from environment
+	// Format: user:password@tcp(host:port)/dbname?parseTime=true
+	databaseDSN := os.Getenv("DATABASE_URL")
 	var db *sql.DB
 	var dbConnected bool
 
-	if databaseURL != "" {
+	if databaseDSN != "" {
 		var err error
-		db, err = sql.Open("postgres", databaseURL)
+		db, err = sql.Open("mysql", databaseDSN)
 		if err != nil {
 			log.Printf("Warning: Failed to connect to database: %v", err)
 		} else if err := db.Ping(); err != nil {
@@ -47,7 +48,7 @@ func main() {
 			db = nil
 		} else {
 			dbConnected = true
-			log.Println("Connected to database")
+			log.Println("Connected to MySQL database")
 		}
 	} else {
 		log.Println("Warning: DATABASE_URL not set, running without database")
@@ -81,17 +82,19 @@ func main() {
 	protected.Use(middleware.AuthMiddleware())
 
 	if db != nil {
-		// Production mode: use real database handlers
-		recipeHandler := handlers.NewRecipeHandler(db)
-		ratingHandler := handlers.NewRatingHandler(db)
-		suggestionHandler := handlers.NewSuggestionHandler(db)
+		// Production mode: use sqlc handlers with MySQL
+		recipeHandler := handlers.NewSqlcRecipeHandler(db)
+		ratingHandler := handlers.NewSqlcRatingHandler(db)
+		suggestionHandler := handlers.NewSqlcSuggestionHandler(db)
 
 		protected.GET("/recipes", recipeHandler.GetRecipes)
 		protected.POST("/recipes", recipeHandler.CreateRecipe)
 		protected.GET("/recipes/:id", recipeHandler.GetRecipe)
 		protected.PUT("/recipes/:id", recipeHandler.UpdateRecipe)
 		protected.DELETE("/recipes/:id", recipeHandler.DeleteRecipe)
+		protected.GET("/recipes/top", recipeHandler.GetRecipesSortedByRating)
 		protected.POST("/recipes/:id/rating", ratingHandler.CreateRating)
+		protected.DELETE("/recipes/:id/rating", ratingHandler.DeleteRating)
 		protected.GET("/suggestions", suggestionHandler.GetSuggestions)
 	} else {
 		// Mock mode: use in-memory handlers for testing
