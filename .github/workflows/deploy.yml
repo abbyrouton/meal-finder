@@ -6,7 +6,66 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache-dependency-path: backend/go.sum
+
+      - name: Build Go binary
+        run: |
+          cd backend
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server main.go
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy backend
+        run: |
+          # Create backend directory on server
+          ssh -i ~/.ssh/deploy_key "${SSH_USERNAME}@${SSH_HOST}" \
+            "mkdir -p ~/meal-finder-backend"
+
+          # Copy binary
+          scp -i ~/.ssh/deploy_key backend/server \
+            "${SSH_USERNAME}@${SSH_HOST}:~/meal-finder-backend/server"
+
+          # Copy migrations (for reference)
+          rsync -avz -e "ssh -i ~/.ssh/deploy_key" \
+            backend/db/migrations/ \
+            "${SSH_USERNAME}@${SSH_HOST}:~/meal-finder-backend/migrations/"
+
+      - name: Restart backend
+        run: |
+          ssh -i ~/.ssh/deploy_key "${SSH_USERNAME}@${SSH_HOST}" << 'EOF'
+            cd ~/meal-finder-backend
+
+            # Stop existing process
+            pm2 stop meal-finder-api 2>/dev/null || true
+
+            # Make binary executable
+            chmod +x server
+
+            # Start with pm2
+            pm2 start ./server --name meal-finder-api
+            pm2 save
+          EOF
+
+  deploy-frontend:
     runs-on: ubuntu-latest
     env:
       SSH_HOST: ${{ secrets.SSH_HOST }}
@@ -36,13 +95,12 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
 
-      - name: Deploy files
+      - name: Deploy frontend
         run: |
           rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" \
             frontend/.next/standalone/ \
             "${SSH_USERNAME}@${SSH_HOST}:~/meal-finder-standalone/"
 
-          # Create .next/static directory since standalone output doesn't include it
           ssh -i ~/.ssh/deploy_key "${SSH_USERNAME}@${SSH_HOST}" \
             "mkdir -p ~/meal-finder-standalone/.next/static"
 
@@ -54,7 +112,7 @@ jobs:
             frontend/public/ \
             "${SSH_USERNAME}@${SSH_HOST}:~/meal-finder-standalone/public/"
 
-      - name: Restart app
+      - name: Restart frontend
         run: |
           ssh -i ~/.ssh/deploy_key "${SSH_USERNAME}@${SSH_HOST}" \
             "cd ~/meal-finder-standalone && pm2 restart meal-finder || pm2 start server.js --name meal-finder && pm2 save"
