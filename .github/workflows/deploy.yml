@@ -54,15 +54,11 @@ jobs:
           ssh -i ~/.ssh/deploy_key "${SSH_USERNAME}@${SSH_HOST}" << 'EOF'
             cd ~/meal-finder-backend
 
-            # Stop existing process
-            pm2 stop meal-finder-api 2>/dev/null || true
-
             # Make binary executable
             chmod +x server
 
-            # Start with pm2
-            pm2 start ./server --name meal-finder-api
-            pm2 save
+            # Restart systemd service
+            sudo systemctl restart meal-finder-api
           EOF
 
   deploy-frontend:

@@ -1,0 +1,30 @@
+[Unit]
+Description=Meal Finder API Server
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/meal-finder-backend
+ExecStart=/home/ubuntu/meal-finder-backend/server
+Restart=always
+RestartSec=5
+
+# Environment variables
+EnvironmentFile=/home/ubuntu/meal-finder-backend/.env
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ubuntu/meal-finder-backend
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=meal-finder-api
+
+[Install]
+WantedBy=multi-user.target
