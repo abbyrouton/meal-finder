@@ -30,18 +30,25 @@ func AuthMiddleware() gin.HandlerFunc {
 		// Get JWT secret from environment
 		jwtSecret := os.Getenv("JWT_SECRET")
 		if jwtSecret == "" {
-			// For Supabase, use the JWT secret from the project settings
 			jwtSecret = os.Getenv("SUPABASE_JWT_SECRET")
 		}
+
+		// Mock mode: if no JWT secret configured, accept "test-token"
 		if jwtSecret == "" {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "JWT secret not configured"})
+			if tokenString == "test-token" {
+				c.Set("userID", "test-user-123")
+				c.Next()
+				return
+			}
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Invalid token. Use 'test-token' for mock mode",
+			})
 			c.Abort()
 			return
 		}
 
-		// Parse and validate token
+		// Production mode: validate JWT
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// Validate signing method
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, jwt.ErrSignatureInvalid
 			}
@@ -54,7 +61,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Extract user ID from claims
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
@@ -62,7 +68,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Supabase JWT has 'sub' claim for user ID
 		userID, ok := claims["sub"].(string)
 		if !ok || userID == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in token"})
@@ -70,7 +75,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Set user ID in context for handlers to use
 		c.Set("userID", userID)
 		c.Next()
 	}

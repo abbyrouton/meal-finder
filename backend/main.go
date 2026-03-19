@@ -67,35 +67,46 @@ func main() {
 			}
 			if dbConnected {
 				status["database"] = "connected"
+				status["mode"] = "production"
 			} else {
 				status["database"] = "not connected"
+				status["mode"] = "mock"
 			}
 			c.JSON(200, status)
 		})
 	}
 
-	// Protected routes (require authentication and database)
+	// Protected routes
+	protected := api.Group("")
+	protected.Use(middleware.AuthMiddleware())
+
 	if db != nil {
+		// Production mode: use real database handlers
 		recipeHandler := handlers.NewRecipeHandler(db)
 		ratingHandler := handlers.NewRatingHandler(db)
 		suggestionHandler := handlers.NewSuggestionHandler(db)
 
-		protected := api.Group("")
-		protected.Use(middleware.AuthMiddleware())
-		{
-			// Recipe routes
-			protected.GET("/recipes", recipeHandler.GetRecipes)
-			protected.POST("/recipes", recipeHandler.CreateRecipe)
-			protected.GET("/recipes/:id", recipeHandler.GetRecipe)
-			protected.PUT("/recipes/:id", recipeHandler.UpdateRecipe)
-			protected.DELETE("/recipes/:id", recipeHandler.DeleteRecipe)
+		protected.GET("/recipes", recipeHandler.GetRecipes)
+		protected.POST("/recipes", recipeHandler.CreateRecipe)
+		protected.GET("/recipes/:id", recipeHandler.GetRecipe)
+		protected.PUT("/recipes/:id", recipeHandler.UpdateRecipe)
+		protected.DELETE("/recipes/:id", recipeHandler.DeleteRecipe)
+		protected.POST("/recipes/:id/rating", ratingHandler.CreateRating)
+		protected.GET("/suggestions", suggestionHandler.GetSuggestions)
+	} else {
+		// Mock mode: use in-memory handlers for testing
+		log.Println("Running in MOCK mode with test data")
+		recipeHandler := handlers.NewMockRecipeHandler()
+		ratingHandler := handlers.NewMockRatingHandler()
+		suggestionHandler := handlers.NewMockSuggestionHandler()
 
-			// Rating routes
-			protected.POST("/recipes/:id/rating", ratingHandler.CreateRating)
-
-			// Suggestion routes
-			protected.GET("/suggestions", suggestionHandler.GetSuggestions)
-		}
+		protected.GET("/recipes", recipeHandler.GetRecipes)
+		protected.POST("/recipes", recipeHandler.CreateRecipe)
+		protected.GET("/recipes/:id", recipeHandler.GetRecipe)
+		protected.PUT("/recipes/:id", recipeHandler.UpdateRecipe)
+		protected.DELETE("/recipes/:id", recipeHandler.DeleteRecipe)
+		protected.POST("/recipes/:id/rating", ratingHandler.CreateRating)
+		protected.GET("/suggestions", suggestionHandler.GetSuggestions)
 	}
 
 	// Get port from environment or default to 3001
