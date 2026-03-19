@@ -64,7 +64,7 @@ func main() {
 		api.GET("/health", func(c *gin.Context) {
 			status := gin.H{
 				"status":  "ok",
-				"message": "Meal Finder API is running",
+				"message": "Meal Finder API v2.0 - Auto-deployed!",
 			}
 			if dbConnected {
 				status["database"] = "connected"
