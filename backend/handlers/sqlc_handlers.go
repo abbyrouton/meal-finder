@@ -23,7 +23,7 @@ func (h *SqlcRecipeHandler) GetRecipes(c *gin.Context) {
 
 	recipes, err := h.queries.ListRecipesByUser(c.Request.Context(), userID)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"error": "Failed to fetch recipes"}) // BUG: wrong status code
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch recipes"})
 		return
 	}
 
