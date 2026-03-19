@@ -17,8 +17,10 @@ func main() {
 	// Load .env file if it exists
 	godotenv.Load()
 
-	// Create Gin router
-	r := gin.Default()
+	// Create Gin router with custom logging
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(middleware.LoggingMiddleware())
 
 	// CORS middleware
 	r.Use(func(c *gin.Context) {
