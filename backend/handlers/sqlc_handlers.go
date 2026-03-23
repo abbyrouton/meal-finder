@@ -27,7 +27,7 @@ func (h *SqlcRecipeHandler) GetRecipes(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, recipes)
+	c.JSON(http.StatusOK, ToRecipeResponses(recipes))
 }
 
 func (h *SqlcRecipeHandler) GetRecipe(c *gin.Context) {
@@ -47,7 +47,7 @@ func (h *SqlcRecipeHandler) GetRecipe(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, recipe)
+	c.JSON(http.StatusOK, ToRecipeResponse(recipe))
 }
 
 type CreateRecipeRequest struct {
@@ -159,7 +159,7 @@ func (h *SqlcRecipeHandler) GetRecipesSortedByRating(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, recipes)
+	c.JSON(http.StatusOK, ToRatedRecipeResponses(recipes))
 }
 
 // SqlcRatingHandler uses sqlc generated queries
