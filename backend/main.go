@@ -77,6 +77,12 @@ func main() {
 			}
 			c.JSON(200, status)
 		})
+
+		// Auth routes (public)
+		if db != nil {
+			authHandler := handlers.NewAuthHandler(db)
+			api.POST("/login", authHandler.Login)
+		}
 	}
 
 	// Protected routes
