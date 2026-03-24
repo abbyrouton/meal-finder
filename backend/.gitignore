@@ -1,5 +1,6 @@
 # Go build output
 server
+meal-finder-backend
 *.exe
 
 # env files
