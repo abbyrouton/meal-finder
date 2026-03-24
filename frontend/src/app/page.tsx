@@ -24,14 +24,23 @@ export default function Home() {
     fetchRecipes();
   }, []);
 
+  const [error, setError] = useState<string | null>(null);
+
   const fetchRecipes = async () => {
     try {
       const response = await fetch('/api/public/recipes');
-      if (response.ok) {
-        const data = await response.json();
+      if (!response.ok) {
+        setError(`API error: ${response.status} ${response.statusText}`);
+        return;
+      }
+      const data = await response.json();
+      if (Array.isArray(data)) {
         setRecipes(data);
+      } else {
+        setError('Invalid response format');
       }
     } catch (err) {
+      setError(`Fetch error: ${err instanceof Error ? err.message : 'Unknown error'}`);
       console.error('Failed to fetch recipes:', err);
     } finally {
       setLoading(false);
@@ -93,6 +102,12 @@ export default function Home() {
           <h2 className="text-2xl font-semibold text-gray-800">All Recipes</h2>
           <span className="text-gray-500">{recipes.length} recipes</span>
         </div>
+
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {error}
+          </div>
+        )}
 
         {loading ? (
           <div className="text-center py-12">
