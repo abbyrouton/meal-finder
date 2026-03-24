@@ -85,6 +85,176 @@ func (q *Queries) GetRecipeByID(ctx context.Context, arg GetRecipeByIDParams) (R
 	return i, err
 }
 
+const getRecipeByIDPublic = `-- name: GetRecipeByIDPublic :one
+SELECT r.id, r.user_id, r.title, r.description, r.ingredients, r.steps, r.cuisine_type, r.prep_time, r.photo_url, r.notes, r.created_at, u.name as user_name, COALESCE(AVG(rt.score), 0) as avg_rating
+FROM recipes r
+LEFT JOIN users u ON r.user_id = u.id
+LEFT JOIN ratings rt ON r.id = rt.recipe_id
+WHERE r.id = ?
+GROUP BY r.id
+`
+
+type GetRecipeByIDPublicRow struct {
+	ID          string         `json:"id"`
+	UserID      string         `json:"user_id"`
+	Title       string         `json:"title"`
+	Description sql.NullString `json:"description"`
+	Ingredients sql.NullString `json:"ingredients"`
+	Steps       sql.NullString `json:"steps"`
+	CuisineType sql.NullString `json:"cuisine_type"`
+	PrepTime    sql.NullInt32  `json:"prep_time"`
+	PhotoUrl    sql.NullString `json:"photo_url"`
+	Notes       sql.NullString `json:"notes"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UserName    sql.NullString `json:"user_name"`
+	AvgRating   interface{}    `json:"avg_rating"`
+}
+
+func (q *Queries) GetRecipeByIDPublic(ctx context.Context, id string) (GetRecipeByIDPublicRow, error) {
+	row := q.db.QueryRowContext(ctx, getRecipeByIDPublic, id)
+	var i GetRecipeByIDPublicRow
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Title,
+		&i.Description,
+		&i.Ingredients,
+		&i.Steps,
+		&i.CuisineType,
+		&i.PrepTime,
+		&i.PhotoUrl,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UserName,
+		&i.AvgRating,
+	)
+	return i, err
+}
+
+const listAllRecipes = `-- name: ListAllRecipes :many
+SELECT r.id, r.user_id, r.title, r.description, r.ingredients, r.steps, r.cuisine_type, r.prep_time, r.photo_url, r.notes, r.created_at, u.name as user_name, COALESCE(AVG(rt.score), 0) as avg_rating
+FROM recipes r
+LEFT JOIN users u ON r.user_id = u.id
+LEFT JOIN ratings rt ON r.id = rt.recipe_id
+GROUP BY r.id
+ORDER BY r.created_at DESC
+`
+
+type ListAllRecipesRow struct {
+	ID          string         `json:"id"`
+	UserID      string         `json:"user_id"`
+	Title       string         `json:"title"`
+	Description sql.NullString `json:"description"`
+	Ingredients sql.NullString `json:"ingredients"`
+	Steps       sql.NullString `json:"steps"`
+	CuisineType sql.NullString `json:"cuisine_type"`
+	PrepTime    sql.NullInt32  `json:"prep_time"`
+	PhotoUrl    sql.NullString `json:"photo_url"`
+	Notes       sql.NullString `json:"notes"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UserName    sql.NullString `json:"user_name"`
+	AvgRating   interface{}    `json:"avg_rating"`
+}
+
+func (q *Queries) ListAllRecipes(ctx context.Context) ([]ListAllRecipesRow, error) {
+	rows, err := q.db.QueryContext(ctx, listAllRecipes)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListAllRecipesRow{}
+	for rows.Next() {
+		var i ListAllRecipesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Title,
+			&i.Description,
+			&i.Ingredients,
+			&i.Steps,
+			&i.CuisineType,
+			&i.PrepTime,
+			&i.PhotoUrl,
+			&i.Notes,
+			&i.CreatedAt,
+			&i.UserName,
+			&i.AvgRating,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAllRecipesSortedByRating = `-- name: ListAllRecipesSortedByRating :many
+SELECT r.id, r.user_id, r.title, r.description, r.ingredients, r.steps, r.cuisine_type, r.prep_time, r.photo_url, r.notes, r.created_at, u.name as user_name, COALESCE(AVG(rt.score), 0) as avg_rating
+FROM recipes r
+LEFT JOIN users u ON r.user_id = u.id
+LEFT JOIN ratings rt ON r.id = rt.recipe_id
+GROUP BY r.id
+ORDER BY avg_rating DESC, r.created_at DESC
+`
+
+type ListAllRecipesSortedByRatingRow struct {
+	ID          string         `json:"id"`
+	UserID      string         `json:"user_id"`
+	Title       string         `json:"title"`
+	Description sql.NullString `json:"description"`
+	Ingredients sql.NullString `json:"ingredients"`
+	Steps       sql.NullString `json:"steps"`
+	CuisineType sql.NullString `json:"cuisine_type"`
+	PrepTime    sql.NullInt32  `json:"prep_time"`
+	PhotoUrl    sql.NullString `json:"photo_url"`
+	Notes       sql.NullString `json:"notes"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UserName    sql.NullString `json:"user_name"`
+	AvgRating   interface{}    `json:"avg_rating"`
+}
+
+func (q *Queries) ListAllRecipesSortedByRating(ctx context.Context) ([]ListAllRecipesSortedByRatingRow, error) {
+	rows, err := q.db.QueryContext(ctx, listAllRecipesSortedByRating)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListAllRecipesSortedByRatingRow{}
+	for rows.Next() {
+		var i ListAllRecipesSortedByRatingRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Title,
+			&i.Description,
+			&i.Ingredients,
+			&i.Steps,
+			&i.CuisineType,
+			&i.PrepTime,
+			&i.PhotoUrl,
+			&i.Notes,
+			&i.CreatedAt,
+			&i.UserName,
+			&i.AvgRating,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listRecipesByUser = `-- name: ListRecipesByUser :many
 SELECT id, user_id, title, description, ingredients, steps, cuisine_type, prep_time, photo_url, notes, created_at FROM recipes
 WHERE user_id = ?

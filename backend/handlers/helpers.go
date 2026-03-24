@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -114,6 +115,132 @@ func ToRatedRecipeResponses(recipes []sqlc.GetRecipesByUserSortedByRatingRow) []
 		result[i] = ToRatedRecipeResponse(r)
 	}
 	return result
+}
+
+// PublicRecipeResponse includes user name and average rating for public view
+type PublicRecipeResponse struct {
+	ID          string     `json:"id"`
+	UserID      string     `json:"user_id"`
+	UserName    *string    `json:"user_name"`
+	Title       string     `json:"title"`
+	Description *string    `json:"description"`
+	Ingredients *string    `json:"ingredients"`
+	Steps       *string    `json:"steps"`
+	CuisineType *string    `json:"cuisine_type"`
+	PrepTime    *int32     `json:"prep_time"`
+	PhotoURL    *string    `json:"photo_url"`
+	Notes       *string    `json:"notes"`
+	CreatedAt   *time.Time `json:"created_at"`
+	AvgRating   float64    `json:"avg_rating"`
+}
+
+// ToPublicRecipeResponse converts a sqlc ListAllRecipesRow to a clean JSON response
+func ToPublicRecipeResponse(r sqlc.ListAllRecipesRow) PublicRecipeResponse {
+	avgRating := 0.0
+	if r.AvgRating != nil {
+		switch v := r.AvgRating.(type) {
+		case float64:
+			avgRating = v
+		case []byte:
+			// MySQL returns DECIMAL as []byte
+			var f float64
+			_, _ = fmt.Sscanf(string(v), "%f", &f)
+			avgRating = f
+		}
+	}
+	return PublicRecipeResponse{
+		ID:          r.ID,
+		UserID:      r.UserID,
+		UserName:    nullStringToPtr(r.UserName),
+		Title:       r.Title,
+		Description: nullStringToPtr(r.Description),
+		Ingredients: nullStringToPtr(r.Ingredients),
+		Steps:       nullStringToPtr(r.Steps),
+		CuisineType: nullStringToPtr(r.CuisineType),
+		PrepTime:    nullInt32ToPtr(r.PrepTime),
+		PhotoURL:    nullStringToPtr(r.PhotoUrl),
+		Notes:       nullStringToPtr(r.Notes),
+		CreatedAt:   nullTimeToPtr(r.CreatedAt),
+		AvgRating:   avgRating,
+	}
+}
+
+// ToPublicRecipeResponses converts a slice to clean JSON responses
+func ToPublicRecipeResponses(recipes []sqlc.ListAllRecipesRow) []PublicRecipeResponse {
+	result := make([]PublicRecipeResponse, len(recipes))
+	for i, r := range recipes {
+		result[i] = ToPublicRecipeResponse(r)
+	}
+	return result
+}
+
+// ToPublicRecipeResponseFromSorted converts sorted rows
+func ToPublicRecipeResponseFromSorted(r sqlc.ListAllRecipesSortedByRatingRow) PublicRecipeResponse {
+	avgRating := 0.0
+	if r.AvgRating != nil {
+		switch v := r.AvgRating.(type) {
+		case float64:
+			avgRating = v
+		case []byte:
+			var f float64
+			_, _ = fmt.Sscanf(string(v), "%f", &f)
+			avgRating = f
+		}
+	}
+	return PublicRecipeResponse{
+		ID:          r.ID,
+		UserID:      r.UserID,
+		UserName:    nullStringToPtr(r.UserName),
+		Title:       r.Title,
+		Description: nullStringToPtr(r.Description),
+		Ingredients: nullStringToPtr(r.Ingredients),
+		Steps:       nullStringToPtr(r.Steps),
+		CuisineType: nullStringToPtr(r.CuisineType),
+		PrepTime:    nullInt32ToPtr(r.PrepTime),
+		PhotoURL:    nullStringToPtr(r.PhotoUrl),
+		Notes:       nullStringToPtr(r.Notes),
+		CreatedAt:   nullTimeToPtr(r.CreatedAt),
+		AvgRating:   avgRating,
+	}
+}
+
+// ToPublicRecipeResponsesFromSorted converts sorted rows
+func ToPublicRecipeResponsesFromSorted(recipes []sqlc.ListAllRecipesSortedByRatingRow) []PublicRecipeResponse {
+	result := make([]PublicRecipeResponse, len(recipes))
+	for i, r := range recipes {
+		result[i] = ToPublicRecipeResponseFromSorted(r)
+	}
+	return result
+}
+
+// ToPublicRecipeResponseFromSingle converts a single public recipe row
+func ToPublicRecipeResponseFromSingle(r sqlc.GetRecipeByIDPublicRow) PublicRecipeResponse {
+	avgRating := 0.0
+	if r.AvgRating != nil {
+		switch v := r.AvgRating.(type) {
+		case float64:
+			avgRating = v
+		case []byte:
+			var f float64
+			_, _ = fmt.Sscanf(string(v), "%f", &f)
+			avgRating = f
+		}
+	}
+	return PublicRecipeResponse{
+		ID:          r.ID,
+		UserID:      r.UserID,
+		UserName:    nullStringToPtr(r.UserName),
+		Title:       r.Title,
+		Description: nullStringToPtr(r.Description),
+		Ingredients: nullStringToPtr(r.Ingredients),
+		Steps:       nullStringToPtr(r.Steps),
+		CuisineType: nullStringToPtr(r.CuisineType),
+		PrepTime:    nullInt32ToPtr(r.PrepTime),
+		PhotoURL:    nullStringToPtr(r.PhotoUrl),
+		Notes:       nullStringToPtr(r.Notes),
+		CreatedAt:   nullTimeToPtr(r.CreatedAt),
+		AvgRating:   avgRating,
+	}
 }
 
 // ErrorResponse logs the error and returns a JSON error response

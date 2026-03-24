@@ -162,6 +162,44 @@ func (h *SqlcRecipeHandler) GetRecipesSortedByRating(c *gin.Context) {
 	c.JSON(http.StatusOK, ToRatedRecipeResponses(recipes))
 }
 
+// Public handlers (no auth required)
+
+func (h *SqlcRecipeHandler) GetAllRecipes(c *gin.Context) {
+	recipes, err := h.queries.ListAllRecipes(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch recipes"})
+		return
+	}
+
+	c.JSON(http.StatusOK, ToPublicRecipeResponses(recipes))
+}
+
+func (h *SqlcRecipeHandler) GetPublicRecipe(c *gin.Context) {
+	recipeID := c.Param("id")
+
+	recipe, err := h.queries.GetRecipeByIDPublic(c.Request.Context(), recipeID)
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Recipe not found"})
+		return
+	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch recipe"})
+		return
+	}
+
+	c.JSON(http.StatusOK, ToPublicRecipeResponseFromSingle(recipe))
+}
+
+func (h *SqlcRecipeHandler) GetAllRecipesSortedByRating(c *gin.Context) {
+	recipes, err := h.queries.ListAllRecipesSortedByRating(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch recipes"})
+		return
+	}
+
+	c.JSON(http.StatusOK, ToPublicRecipeResponsesFromSorted(recipes))
+}
+
 // SqlcRatingHandler uses sqlc generated queries
 type SqlcRatingHandler struct {
 	queries *sqlc.Queries

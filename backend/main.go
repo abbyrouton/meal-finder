@@ -85,16 +85,28 @@ func main() {
 		}
 	}
 
-	// Protected routes
+	// Initialize handlers
+	var recipeHandler *handlers.SqlcRecipeHandler
+	var ratingHandler *handlers.SqlcRatingHandler
+	var suggestionHandler *handlers.SqlcSuggestionHandler
+
+	if db != nil {
+		recipeHandler = handlers.NewSqlcRecipeHandler(db)
+		ratingHandler = handlers.NewSqlcRatingHandler(db)
+		suggestionHandler = handlers.NewSqlcSuggestionHandler(db)
+
+		// Public read-only routes (no auth required)
+		api.GET("/public/recipes", recipeHandler.GetAllRecipes)
+		api.GET("/public/recipes/:id", recipeHandler.GetPublicRecipe)
+		api.GET("/public/recipes/top", recipeHandler.GetAllRecipesSortedByRating)
+	}
+
+	// Protected routes (auth required for create/update/delete)
 	protected := api.Group("")
 	protected.Use(middleware.AuthMiddleware())
 
 	if db != nil {
-		// Production mode: use sqlc handlers with MySQL
-		recipeHandler := handlers.NewSqlcRecipeHandler(db)
-		ratingHandler := handlers.NewSqlcRatingHandler(db)
-		suggestionHandler := handlers.NewSqlcSuggestionHandler(db)
-
+		// User's own recipes
 		protected.GET("/recipes", recipeHandler.GetRecipes)
 		protected.POST("/recipes", recipeHandler.CreateRecipe)
 		protected.GET("/recipes/:id", recipeHandler.GetRecipe)
@@ -107,17 +119,17 @@ func main() {
 	} else {
 		// Mock mode: use in-memory handlers for testing
 		log.Println("Running in MOCK mode with test data")
-		recipeHandler := handlers.NewMockRecipeHandler()
-		ratingHandler := handlers.NewMockRatingHandler()
-		suggestionHandler := handlers.NewMockSuggestionHandler()
+		mockRecipeHandler := handlers.NewMockRecipeHandler()
+		mockRatingHandler := handlers.NewMockRatingHandler()
+		mockSuggestionHandler := handlers.NewMockSuggestionHandler()
 
-		protected.GET("/recipes", recipeHandler.GetRecipes)
-		protected.POST("/recipes", recipeHandler.CreateRecipe)
-		protected.GET("/recipes/:id", recipeHandler.GetRecipe)
-		protected.PUT("/recipes/:id", recipeHandler.UpdateRecipe)
-		protected.DELETE("/recipes/:id", recipeHandler.DeleteRecipe)
-		protected.POST("/recipes/:id/rating", ratingHandler.CreateRating)
-		protected.GET("/suggestions", suggestionHandler.GetSuggestions)
+		protected.GET("/recipes", mockRecipeHandler.GetRecipes)
+		protected.POST("/recipes", mockRecipeHandler.CreateRecipe)
+		protected.GET("/recipes/:id", mockRecipeHandler.GetRecipe)
+		protected.PUT("/recipes/:id", mockRecipeHandler.UpdateRecipe)
+		protected.DELETE("/recipes/:id", mockRecipeHandler.DeleteRecipe)
+		protected.POST("/recipes/:id/rating", mockRatingHandler.CreateRating)
+		protected.GET("/suggestions", mockSuggestionHandler.GetSuggestions)
 	}
 
 	// Get port from environment or default to 3001

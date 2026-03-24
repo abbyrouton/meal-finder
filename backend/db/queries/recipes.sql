@@ -26,3 +26,27 @@ WHERE id = ? AND user_id = ?;
 -- name: DeleteRecipe :exec
 DELETE FROM recipes
 WHERE id = ? AND user_id = ?;
+
+-- name: ListAllRecipes :many
+SELECT r.*, u.name as user_name, COALESCE(AVG(rt.score), 0) as avg_rating
+FROM recipes r
+LEFT JOIN users u ON r.user_id = u.id
+LEFT JOIN ratings rt ON r.id = rt.recipe_id
+GROUP BY r.id
+ORDER BY r.created_at DESC;
+
+-- name: GetRecipeByIDPublic :one
+SELECT r.*, u.name as user_name, COALESCE(AVG(rt.score), 0) as avg_rating
+FROM recipes r
+LEFT JOIN users u ON r.user_id = u.id
+LEFT JOIN ratings rt ON r.id = rt.recipe_id
+WHERE r.id = ?
+GROUP BY r.id;
+
+-- name: ListAllRecipesSortedByRating :many
+SELECT r.*, u.name as user_name, COALESCE(AVG(rt.score), 0) as avg_rating
+FROM recipes r
+LEFT JOIN users u ON r.user_id = u.id
+LEFT JOIN ratings rt ON r.id = rt.recipe_id
+GROUP BY r.id
+ORDER BY avg_rating DESC, r.created_at DESC;
