@@ -108,7 +108,11 @@ jobs:
             frontend/public/ \
             "${SSH_USERNAME}@${SSH_HOST}:~/meal-finder-standalone/public/"
 
+          # Create symlink so server.js can find static files
+          ssh -i ~/.ssh/deploy_key "${SSH_USERNAME}@${SSH_HOST}" \
+            "ln -sf ~/meal-finder-standalone/.next/static ~/meal-finder-standalone/frontend/.next/static"
+
       - name: Restart frontend
         run: |
           ssh -i ~/.ssh/deploy_key "${SSH_USERNAME}@${SSH_HOST}" \
-            "cd ~/meal-finder-standalone && pm2 restart meal-finder || pm2 start server.js --name meal-finder && pm2 save"
+            "sudo systemctl restart meal-finder-frontend"
