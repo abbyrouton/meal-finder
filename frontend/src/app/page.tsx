@@ -2,183 +2,110 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-
-interface Recipe {
-  id: string;
-  title: string;
-  description: string | null;
-  cuisine_type: string | null;
-  prep_time: number | null;
-  user_name: string | null;
-  avg_rating: number;
-}
+import { Recipe } from '@/types';
+import { RecipeCard, LoadingSpinner, ChefHat } from '@/components';
+import { fetchPublicRecipes } from '@/lib/api';
+import { placeholderRecipes } from '@/lib/placeholder-data';
+import { getLocalRecipes } from '@/lib/local-recipes';
 
 export default function Home() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
-    fetchRecipes();
+    loadRecipes();
   }, []);
 
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchRecipes = async () => {
+  const loadRecipes = async () => {
     try {
-      const response = await fetch('/api/public/recipes');
-      if (!response.ok) {
-        setError(`API error: ${response.status} ${response.statusText}`);
-        return;
-      }
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setRecipes(data);
+      const data = await fetchPublicRecipes();
+      if (data.length > 0) {
+        const localRecipes = getLocalRecipes();
+        setRecipes([...localRecipes, ...data]);
       } else {
-        setError('Invalid response format');
+        const localRecipes = getLocalRecipes();
+        setRecipes([...localRecipes, ...placeholderRecipes]);
       }
-    } catch (err) {
-      setError(`Fetch error: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      console.error('Failed to fetch recipes:', err);
+    } catch {
+      const localRecipes = getLocalRecipes();
+      setRecipes([...localRecipes, ...placeholderRecipes]);
     } finally {
       setLoading(false);
     }
   };
 
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push(<span key={i} className="text-yellow-400">&#9733;</span>);
-      } else {
-        stars.push(<span key={i} className="text-gray-300">&#9733;</span>);
-      }
-    }
-    return stars;
-  };
+  const localCount = recipes.filter(r => r.id.startsWith('local-')).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-orange-600">Meal Finder</h1>
-          <div className="flex items-center gap-4">
-            {isLoggedIn ? (
-              <Link
-                href="/dashboard"
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition"
-              >
-                My Recipes
-              </Link>
-            ) : (
-              <Link
-                href="/login"
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition"
-              >
-                Sign In
-              </Link>
-            )}
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="bg-orange-600 text-white py-16">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-4">Discover Delicious Recipes</h2>
-          <p className="text-xl opacity-90">
+      <div className="bg-black text-white py-16 relative overflow-hidden">
+        <div className="absolute inset-0 checkerboard-dark opacity-30" />
+        <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+          <ChefHat size={64} className="text-red-600 mx-auto mb-4" />
+          <h1 className="text-4xl font-bold mb-4">Discover Delicious Recipes</h1>
+          <p className="text-xl text-gray-300 mb-8">
             Browse community recipes, ratings, and find your next favorite meal
           </p>
+          <div className="flex justify-center gap-4">
+            <Link
+              href="/recipes"
+              className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition"
+            >
+              Browse Recipes
+            </Link>
+            <Link
+              href="/recipes/new"
+              className="px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition"
+            >
+              Add Recipe
+            </Link>
+          </div>
         </div>
       </div>
+
+      {/* Checkerboard divider */}
+      <div className="h-4 checkerboard" />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800">All Recipes</h2>
-          <span className="text-gray-500">{recipes.length} recipes</span>
+          <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
+            <ChefHat size={28} className="text-red-600" />
+            {localCount > 0 ? 'Your Recipes & More' : 'Featured Recipes'}
+          </h2>
+          <Link href="/recipes" className="text-red-600 hover:text-red-700 font-medium">
+            View all &rarr;
+          </Link>
         </div>
 
-        {error && (
-          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            {error}
+        {localCount > 0 && (
+          <div className="mb-6 p-4 bg-green-50 border-2 border-green-200 rounded-lg text-green-700">
+            <ChefHat size={20} className="inline mr-2" />
+            You have {localCount} recipe{localCount > 1 ? 's' : ''} saved!
           </div>
         )}
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="text-xl text-orange-600">Loading recipes...</div>
-          </div>
-        ) : recipes.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl shadow">
-            <p className="text-gray-500">No recipes yet. Be the first to add one!</p>
-            {!isLoggedIn && (
-              <Link
-                href="/login"
-                className="inline-block mt-4 px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition"
-              >
-                Sign in to add recipes
-              </Link>
-            )}
-          </div>
+          <LoadingSpinner message="Loading recipes..." />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recipes.map((recipe) => (
-              <div
-                key={recipe.id}
-                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition"
-              >
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      {recipe.title}
-                    </h3>
-                    {recipe.prep_time && (
-                      <span className="text-sm text-gray-500">
-                        {recipe.prep_time} min
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex">{renderStars(recipe.avg_rating)}</div>
-                    <span className="text-sm text-gray-500">
-                      ({recipe.avg_rating.toFixed(1)})
-                    </span>
-                  </div>
-
-                  {recipe.cuisine_type && (
-                    <span className="inline-block px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full mb-2">
-                      {recipe.cuisine_type}
-                    </span>
-                  )}
-
-                  {recipe.description && (
-                    <p className="text-gray-600 text-sm line-clamp-2 mb-3">
-                      {recipe.description}
-                    </p>
-                  )}
-
-                  {recipe.user_name && (
-                    <p className="text-xs text-gray-400">
-                      By {recipe.user_name}
-                    </p>
-                  )}
-                </div>
-              </div>
+            {recipes.slice(0, 6).map((recipe) => (
+              <Link key={recipe.id} href={`/recipes/${recipe.id}`}>
+                <RecipeCard recipe={recipe} showRating showAuthor />
+              </Link>
             ))}
           </div>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t mt-12">
-        <div className="max-w-6xl mx-auto px-4 py-6 text-center text-gray-500 text-sm">
-          Meal Finder - Your personal recipe library
+      <footer className="bg-black text-white border-t-4 border-red-600 mt-12">
+        <div className="max-w-6xl mx-auto px-4 py-6 text-center">
+          <div className="flex items-center justify-center gap-2 text-sm">
+            <ChefHat size={20} className="text-red-600" />
+            <span>Meal Finder - Your personal recipe library</span>
+          </div>
         </div>
       </footer>
     </div>
