@@ -82,6 +82,7 @@ func main() {
 		if db != nil {
 			authHandler := handlers.NewAuthHandler(db)
 			api.POST("/login", authHandler.Login)
+			api.POST("/signup", authHandler.Signup)
 		}
 	}
 
