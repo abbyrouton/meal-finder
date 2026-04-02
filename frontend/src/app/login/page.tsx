@@ -131,6 +131,12 @@ export default function LoginPage() {
             <p>Test credentials:</p>
             <p className="font-mono text-xs mt-1">test@mealfinder.com / password123</p>
           </div>
+
+          <div className="mt-6 text-center">
+            <Link href="/" className="text-gray-500 hover:text-gray-700 text-sm">
+              ← Back to Home
+            </Link>
+          </div>
         </div>
       </div>
     </div>
