@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { StarRating, LoadingSpinner, ChefHat } from '@/components';
 import { getPlaceholderRecipe, RecipeDetail } from '@/lib/placeholder-data';
 import { getLocalRecipe, deleteLocalRecipe } from '@/lib/local-recipes';
-import { useRecipe, useDeleteRecipe, useRateRecipe } from '@/lib/hooks/useRecipes';
+import { usePublicRecipe, useDeleteRecipe, useRateRecipe } from '@/lib/hooks/useRecipes';
 
 export default function RecipeDetailPage() {
   const params = useParams();
@@ -24,7 +24,7 @@ export default function RecipeDetailPage() {
     data: apiRecipe,
     isLoading: isLoadingApi,
     isError: isApiError,
-  } = useRecipe(recipeId);
+  } = usePublicRecipe(recipeId);
 
   // Mutations
   const deleteRecipeMutation = useDeleteRecipe();

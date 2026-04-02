@@ -126,6 +126,17 @@ export async function getPublicRecipes(): Promise<Recipe[]> {
   return handleResponse<Recipe[]>(response);
 }
 
+// GET /api/public/recipes/:id - Get single public recipe (no auth required)
+export async function getPublicRecipe(id: string): Promise<RecipeDetail> {
+  const response = await fetch(`${API_BASE}/public/recipes/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return handleResponse<RecipeDetail>(response);
+}
+
 // POST /api/recipes/:id/rate - Rate a recipe
 export async function rateRecipe(id: string, rating: number): Promise<void> {
   const response = await fetch(`${API_BASE}/recipes/${id}/rate`, {

@@ -6,6 +6,7 @@ import {
   updateRecipe,
   deleteRecipe,
   getPublicRecipes,
+  getPublicRecipe,
   rateRecipe,
   CreateRecipeData,
   UpdateRecipeData,
@@ -39,11 +40,21 @@ export function usePublicRecipes() {
   });
 }
 
-// GET /api/recipes/:id - Get single recipe
+// GET /api/recipes/:id - Get single recipe (authenticated)
 export function useRecipe(id: string) {
   return useQuery({
     queryKey: recipeKeys.detail(id),
     queryFn: () => getRecipe(id),
+    enabled: !!id && !id.startsWith('local-') && !id.startsWith('placeholder-'),
+    retry: 1,
+  });
+}
+
+// GET /api/public/recipes/:id - Get single public recipe (no auth required)
+export function usePublicRecipe(id: string) {
+  return useQuery({
+    queryKey: ['publicRecipe', id],
+    queryFn: () => getPublicRecipe(id),
     enabled: !!id && !id.startsWith('local-') && !id.startsWith('placeholder-'),
     retry: 1,
   });
