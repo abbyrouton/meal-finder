@@ -26,7 +26,8 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/signup', {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${apiBase}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),

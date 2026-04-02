@@ -1,7 +1,7 @@
 import { Recipe } from '@/types';
 import { RecipeDetail } from '@/lib/placeholder-data';
 
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 // Error class for API errors
 export class ApiError extends Error {

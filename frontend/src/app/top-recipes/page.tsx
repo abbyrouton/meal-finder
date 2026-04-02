@@ -6,6 +6,8 @@ import { Recipe } from '@/types';
 import { LoadingSpinner, ChefHat, EmptyState } from '@/components';
 import { placeholderRecipes } from '@/lib/placeholder-data';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
 export default function TopRecipesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +19,7 @@ export default function TopRecipesPage() {
 
   const fetchTopRecipes = async () => {
     try {
-      const response = await fetch('/api/recipes/top');
+      const response = await fetch(`${API_BASE}/recipes/top`);
       if (!response.ok) {
         throw new Error('Failed to load top recipes');
       }

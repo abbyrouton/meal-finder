@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { User } from '@/types';
 import { LoadingSpinner, ErrorMessage, ChefHat } from '@/components';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,7 +44,7 @@ export default function ProfilePage() {
     const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch('/api/profile', {
+      const response = await fetch(`${API_BASE}/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +79,7 @@ export default function ProfilePage() {
     const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch('/api/profile/password', {
+      const response = await fetch(`${API_BASE}/profile/password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -7,6 +7,8 @@ import { Recipe } from '@/types';
 import { RecipeCard, LoadingSpinner, ChefHat, EmptyState } from '@/components';
 import { placeholderRecipes, topCuisines } from '@/lib/placeholder-data';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
 interface SuggestionData {
   top_cuisines: string[];
   suggestions: Recipe[];
@@ -35,7 +37,7 @@ export default function SuggestionsPage() {
 
   const fetchSuggestions = async (token: string) => {
     try {
-      const response = await fetch('/api/suggestions', {
+      const response = await fetch(`${API_BASE}/suggestions`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
