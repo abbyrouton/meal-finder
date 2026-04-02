@@ -18,7 +18,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch('http://localhost:3001/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ export default function LoginPage() {
 
           <div className="mt-4 text-center text-sm text-gray-400">
             <p>Test credentials:</p>
-            <p className="font-mono text-xs mt-1">admin@mealfinder.com / Admin123!</p>
+            <p className="font-mono text-xs mt-1">test@mealfinder.com / password123</p>
           </div>
         </div>
       </div>

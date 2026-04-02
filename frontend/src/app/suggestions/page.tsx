@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Recipe } from '@/types';
-import { RecipeCard, LoadingSpinner, ChefHat } from '@/components';
+import { RecipeCard, LoadingSpinner, ChefHat, EmptyState } from '@/components';
 import { placeholderRecipes, topCuisines } from '@/lib/placeholder-data';
 
 interface SuggestionData {
@@ -99,9 +99,10 @@ export default function SuggestionsPage() {
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
         {usingPlaceholder && (
-          <div className="mb-6 p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg text-center text-gray-600">
-            <ChefHat size={24} className="text-gray-400 mx-auto mb-2" />
-            Showing sample suggestions. Rate some recipes to get personalized recommendations!
+          <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg text-center">
+            <ChefHat size={24} className="text-purple-500 mx-auto mb-2" />
+            <p className="text-gray-700 font-medium">We're showing you popular recipes to explore!</p>
+            <p className="text-gray-500 text-sm mt-1">Rate some recipes and we'll learn your taste to give personalized suggestions.</p>
           </div>
         )}
 

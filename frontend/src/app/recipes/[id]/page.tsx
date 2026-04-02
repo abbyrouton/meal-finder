@@ -3,123 +3,114 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { StarRating, LoadingSpinner, ErrorMessage, ChefHat } from '@/components';
+import { StarRating, LoadingSpinner, ChefHat } from '@/components';
 import { getPlaceholderRecipe, RecipeDetail } from '@/lib/placeholder-data';
 import { getLocalRecipe, deleteLocalRecipe } from '@/lib/local-recipes';
+import { useRecipe, useDeleteRecipe, useRateRecipe } from '@/lib/hooks/useRecipes';
 
 export default function RecipeDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const [recipe, setRecipe] = useState<RecipeDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [userRating, setUserRating] = useState<number>(0);
-  const [ratingLoading, setRatingLoading] = useState(false);
+  const recipeId = params.id as string;
+
+  const [localRecipe, setLocalRecipe] = useState<RecipeDetail | null>(null);
   const [isLocalRecipe, setIsLocalRecipe] = useState(false);
   const [isPlaceholder, setIsPlaceholder] = useState(false);
+  const [userRating, setUserRating] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
 
+  // Fetch from API using TanStack Query (only for non-local, non-placeholder)
+  const {
+    data: apiRecipe,
+    isLoading: isLoadingApi,
+    isError: isApiError,
+  } = useRecipe(recipeId);
+
+  // Mutations
+  const deleteRecipeMutation = useDeleteRecipe();
+  const rateRecipeMutation = useRateRecipe();
+
+  // Load local or placeholder recipe
   useEffect(() => {
-    if (params.id) {
-      fetchRecipe(params.id as string);
-    }
-  }, [params.id]);
-
-  const fetchRecipe = async (id: string) => {
-    // Check if it's a local recipe
-    if (id.startsWith('local-')) {
-      const localRecipe = getLocalRecipe(id);
-      if (localRecipe) {
-        setRecipe(localRecipe);
+    if (recipeId.startsWith('local-')) {
+      const recipe = getLocalRecipe(recipeId);
+      if (recipe) {
+        setLocalRecipe(recipe);
         setIsLocalRecipe(true);
-      } else {
-        setError('Recipe not found');
       }
-      setLoading(false);
-      return;
-    }
-
-    // Check if it's a placeholder recipe
-    if (id.startsWith('placeholder-')) {
-      const placeholderRecipe = getPlaceholderRecipe(id);
-      if (placeholderRecipe) {
-        setRecipe(placeholderRecipe);
+    } else if (recipeId.startsWith('placeholder-')) {
+      const recipe = getPlaceholderRecipe(recipeId);
+      if (recipe) {
+        setLocalRecipe(recipe);
         setIsPlaceholder(true);
-      } else {
-        setError('Recipe not found');
       }
-      setLoading(false);
-      return;
     }
+  }, [recipeId]);
 
-    try {
-      const response = await fetch(`/api/recipes/${id}`);
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Recipe not found');
-        }
-        throw new Error('Failed to load recipe');
-      }
-      const data = await response.json();
-      setRecipe(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load recipe');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Determine which recipe to show
+  const recipe = isLocalRecipe || isPlaceholder ? localRecipe : apiRecipe;
+  const isLoading = !isLocalRecipe && !isPlaceholder && isLoadingApi;
 
   const handleRate = async (rating: number) => {
-    setRatingLoading(true);
     setUserRating(rating);
-    setRatingLoading(false);
+
+    // Only rate API recipes
+    if (!isLocalRecipe && !isPlaceholder && recipeId) {
+      rateRecipeMutation.mutate(
+        { id: recipeId, rating },
+        {
+          onError: () => {
+            setError('Failed to save rating');
+          },
+        }
+      );
+    }
   };
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this recipe?')) return;
 
     if (isLocalRecipe) {
-      deleteLocalRecipe(params.id as string);
+      deleteLocalRecipe(recipeId);
       router.push('/recipes');
       return;
     }
 
-    const token = localStorage.getItem('token');
-    try {
-      const response = await fetch(`/api/recipes/${params.id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete recipe');
-      }
-
-      router.push('/recipes');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete recipe');
-    }
+    deleteRecipeMutation.mutate(recipeId, {
+      onSuccess: () => {
+        router.push('/recipes');
+      },
+      onError: (err) => {
+        setError(err.message || 'Failed to delete recipe');
+      },
+    });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-white">
+        <div className="h-2 checkerboard" />
         <LoadingSpinner message="Loading recipe..." />
       </div>
     );
   }
 
-  if (error || !recipe) {
+  if ((isApiError && !isLocalRecipe && !isPlaceholder) || !recipe) {
     return (
       <div className="min-h-screen bg-white">
         <div className="h-2 checkerboard" />
         <main className="max-w-2xl mx-auto px-4 py-8">
-          <ErrorMessage message={error || 'Recipe not found'} />
-          <Link
-            href="/recipes"
-            className="inline-block mt-4 text-red-600 hover:text-red-700"
-          >
-            &larr; Back to recipes
-          </Link>
+          <div className="text-center py-12">
+            <ChefHat size={48} className="text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Recipe not found</h2>
+            <p className="text-gray-500 mb-6">We couldn't find this recipe. It may have been deleted.</p>
+            <Link
+              href="/recipes"
+              className="inline-block px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition"
+            >
+              Back to Recipes
+            </Link>
+          </div>
         </main>
       </div>
     );
@@ -152,6 +143,12 @@ export default function RecipeDetailPage() {
           </div>
         )}
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border-2 border-red-500 text-red-700 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
         <div className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden">
           <div className="p-8">
             {/* Title and Actions */}
@@ -167,12 +164,13 @@ export default function RecipeDetailPage() {
                 >
                   Edit
                 </Link>
-                {(isLocalRecipe || (!isPlaceholder && !isLocalRecipe)) && (
+                {!isPlaceholder && (
                   <button
                     onClick={handleDelete}
-                    className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
+                    disabled={deleteRecipeMutation.isPending}
+                    className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition disabled:opacity-50"
                   >
-                    Delete
+                    {deleteRecipeMutation.isPending ? 'Deleting...' : 'Delete'}
                   </button>
                 )}
               </div>
@@ -258,26 +256,28 @@ export default function RecipeDetailPage() {
             )}
 
             {/* Rate This Recipe */}
-            <div className="border-t-2 border-gray-200 pt-6 mt-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Rate this recipe</h2>
-              <div className="flex items-center gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => handleRate(star)}
-                    disabled={ratingLoading}
-                    className={`text-3xl transition ${
-                      star <= userRating ? 'text-red-500' : 'text-gray-300'
-                    } hover:text-red-500 disabled:opacity-50`}
-                  >
-                    &#9733;
-                  </button>
-                ))}
-                {userRating > 0 && (
-                  <span className="ml-2 text-gray-500">You rated: {userRating} stars</span>
-                )}
+            {!isPlaceholder && (
+              <div className="border-t-2 border-gray-200 pt-6 mt-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-3">Rate this recipe</h2>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => handleRate(star)}
+                      disabled={rateRecipeMutation.isPending}
+                      className={`text-3xl transition ${
+                        star <= userRating ? 'text-red-500' : 'text-gray-300'
+                      } hover:text-red-500 disabled:opacity-50`}
+                    >
+                      &#9733;
+                    </button>
+                  ))}
+                  {userRating > 0 && (
+                    <span className="ml-2 text-gray-500">You rated: {userRating} stars</span>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </main>

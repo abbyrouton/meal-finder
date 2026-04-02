@@ -1,6 +1,7 @@
 import { Recipe } from '@/types';
 import { StarRating } from './StarRating';
 import { ChefHat } from './ChefHat';
+import { cn } from '@/lib/utils';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -9,12 +10,27 @@ interface RecipeCardProps {
 }
 
 export function RecipeCard({ recipe, showAuthor = false, showRating = false }: RecipeCardProps) {
+  const cardStyles = cn(
+    // Base styles
+    "recipe-card bg-white border-2 border-gray-200 rounded-xl overflow-hidden",
+    // Hover effects
+    "hover:border-red-500 hover:shadow-lg",
+    // Transitions
+    "transition-all duration-200 group",
+    // Focus styles for accessibility
+    "focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500 focus-within:ring-offset-2"
+  );
+
   return (
-    <div className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-red-500 hover:shadow-lg transition group">
+    <article className={cardStyles} aria-label={`Recipe: ${recipe.title}`}>
       <div className="p-6">
         <div className="flex justify-between items-start mb-2">
           <div className="flex items-center gap-2">
-            <ChefHat size={20} className="text-red-600 opacity-0 group-hover:opacity-100 transition" />
+            <ChefHat
+              size={20}
+              className="text-red-600 opacity-0 group-hover:opacity-100 transition"
+              aria-hidden="true"
+            />
             <h3 className="text-lg font-semibold text-gray-900">{recipe.title}</h3>
           </div>
           {recipe.prep_time && (
@@ -22,7 +38,7 @@ export function RecipeCard({ recipe, showAuthor = false, showRating = false }: R
           )}
         </div>
 
-        {showRating && recipe.avg_rating !== undefined && (
+        {showRating && recipe.avg_rating != null && (
           <div className="flex items-center gap-2 mb-2">
             <StarRating rating={recipe.avg_rating} />
             <span className="text-sm text-gray-500">({recipe.avg_rating.toFixed(1)})</span>
@@ -43,6 +59,6 @@ export function RecipeCard({ recipe, showAuthor = false, showRating = false }: R
           <p className="text-xs text-gray-400">By {recipe.user_name}</p>
         )}
       </div>
-    </div>
+    </article>
   );
 }

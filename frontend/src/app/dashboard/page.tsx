@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Recipe } from '@/types';
-import { RecipeCard, LoadingSpinner, ErrorMessage, ChefHat } from '@/components';
+import { RecipeCard, LoadingSpinner, ErrorMessage, ChefHat, EmptyState } from '@/components';
 import { fetchUserRecipes } from '@/lib/api';
 import { placeholderRecipes } from '@/lib/placeholder-data';
 
@@ -73,17 +73,16 @@ export default function DashboardPage() {
         {error && <ErrorMessage message={error} className="mb-6" />}
 
         {usingPlaceholder ? (
-          <div className="space-y-6">
-            <div className="text-center py-8 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl">
-              <ChefHat size={48} className="text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-4">You haven't added any recipes yet.</p>
-              <Link
-                href="/recipes/new"
-                className="inline-block px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-              >
-                Add Your First Recipe
-              </Link>
-            </div>
+          <div className="space-y-8">
+            <EmptyState
+              icon="chef"
+              title="Welcome to your kitchen!"
+              description="Your personal recipe collection is empty. Start adding your favorite recipes and build your own digital cookbook."
+              actionLabel="Add Your First Recipe"
+              actionHref="/recipes/new"
+              secondaryActionLabel="Browse All Recipes"
+              secondaryActionHref="/recipes"
+            />
 
             <div>
               <h2 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Recipe } from '@/types';
-import { LoadingSpinner, ChefHat } from '@/components';
+import { LoadingSpinner, ChefHat, EmptyState } from '@/components';
 import { placeholderRecipes } from '@/lib/placeholder-data';
 
 export default function TopRecipesPage() {
@@ -59,9 +59,10 @@ export default function TopRecipesPage() {
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
         {usingPlaceholder && (
-          <div className="mb-6 p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg text-center text-gray-600">
-            <ChefHat size={24} className="text-gray-400 mx-auto mb-2" />
-            Showing sample recipes. Sign in to rate and add your own!
+          <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-lg text-center">
+            <ChefHat size={24} className="text-red-500 mx-auto mb-2" />
+            <p className="text-gray-700 font-medium">These are sample recipes to get you started!</p>
+            <p className="text-gray-500 text-sm mt-1">Sign in to rate recipes and see real community favorites.</p>
           </div>
         )}
 
