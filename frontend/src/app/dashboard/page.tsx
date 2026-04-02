@@ -50,24 +50,50 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-white">
-        <LoadingSpinner message="Loading your recipes..." />
+        {/* Hero Section */}
+        <div className="bg-black text-white py-12 relative overflow-hidden">
+          <div className="absolute inset-0 checkerboard-lg-dark opacity-20" />
+          <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+            <ChefHat size={48} className="text-red-600 mx-auto mb-4" />
+            <h1 className="text-4xl font-bold tracking-tight">My Recipes</h1>
+            <p className="text-gray-300 mt-2">Your personal recipe collection</p>
+          </div>
+        </div>
+        <div className="h-12 checkerboard-lg" />
+        <main className="max-w-6xl mx-auto px-4 py-8">
+          <LoadingSpinner message="Loading your recipes..." />
+        </main>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Checkerboard accent */}
-      <div className="h-2 checkerboard" />
+      {/* Hero Section */}
+      <div className="bg-black text-white py-12 relative overflow-hidden">
+        <div className="absolute inset-0 checkerboard-lg-dark opacity-20" />
+        <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+          <ChefHat size={48} className="text-red-600 mx-auto mb-4" />
+          <h1 className="text-4xl font-bold tracking-tight">My Recipes</h1>
+          <p className="text-gray-300 mt-2">Your personal recipe collection</p>
+        </div>
+      </div>
+
+      {/* Checkerboard divider */}
+      <div className="h-12 checkerboard-lg" />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-            <ChefHat size={28} className="text-red-600" />
-            My Recipes
-          </h1>
-          <span className="text-gray-500">{usingPlaceholder ? 0 : recipes.length} recipes</span>
+          <span className="text-lg font-medium text-gray-700">
+            {usingPlaceholder ? 0 : recipes.length} recipes
+          </span>
+          <Link
+            href="/recipes/new"
+            className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition"
+          >
+            + Add Recipe
+          </Link>
         </div>
 
         {error && <ErrorMessage message={error} className="mb-6" />}

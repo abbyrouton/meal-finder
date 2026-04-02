@@ -45,18 +45,18 @@ export default function TopRecipesPage() {
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <div className="bg-black text-white py-12 relative overflow-hidden">
-        <div className="absolute inset-0 checkerboard-dark opacity-30" />
+        <div className="absolute inset-0 checkerboard-lg-dark opacity-20" />
         <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
           <ChefHat size={48} className="text-red-600 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold mb-2">Top Rated Recipes</h1>
-          <p className="text-lg text-gray-300">
+          <h1 className="text-4xl font-bold tracking-tight">Top Rated Recipes</h1>
+          <p className="text-gray-300 mt-2">
             The highest rated recipes from our community
           </p>
         </div>
       </div>
 
       {/* Checkerboard divider */}
-      <div className="h-4 checkerboard" />
+      <div className="h-12 checkerboard-lg" />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">

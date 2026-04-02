@@ -112,15 +112,21 @@ export default function NewRecipePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Checkerboard accent */}
-      <div className="h-2 checkerboard" />
+      {/* Hero Section */}
+      <div className="bg-black text-white py-12 relative overflow-hidden">
+        <div className="absolute inset-0 checkerboard-lg-dark opacity-20" />
+        <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+          <ChefHat size={48} className="text-red-600 mx-auto mb-4" />
+          <h1 className="text-4xl font-bold tracking-tight">Add New Recipe</h1>
+          <p className="text-gray-300 mt-2">Share your culinary creation</p>
+        </div>
+      </div>
+
+      {/* Checkerboard divider */}
+      <div className="h-12 checkerboard-lg" />
 
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-          <ChefHat size={28} className="text-red-600" />
-          Add New Recipe
-        </h1>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="bg-white border-2 border-gray-200 rounded-xl p-6 space-y-6">

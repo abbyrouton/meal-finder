@@ -39,24 +39,24 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="bg-black text-white py-16 relative overflow-hidden">
-        <div className="absolute inset-0 checkerboard-dark opacity-30" />
+      <div className="bg-black text-white py-20 relative overflow-hidden">
+        <div className="absolute inset-0 checkerboard-lg-dark opacity-20" />
         <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
-          <ChefHat size={64} className="text-red-600 mx-auto mb-4" />
-          <h1 className="text-4xl font-bold mb-4">Discover Delicious Recipes</h1>
-          <p className="text-xl text-gray-300 mb-8">
+          <ChefHat size={72} className="text-red-600 mx-auto mb-6" />
+          <h1 className="text-5xl font-bold mb-4 tracking-tight">Discover Delicious Recipes</h1>
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
             Browse community recipes, ratings, and find your next favorite meal
           </p>
           <div className="flex justify-center gap-4">
             <Link
               href="/recipes"
-              className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition"
+              className="px-8 py-4 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition text-lg"
             >
               Browse Recipes
             </Link>
             <Link
               href="/recipes/new"
-              className="px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-black transition"
+              className="px-8 py-4 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-black transition text-lg"
             >
               Add Recipe
             </Link>
@@ -64,8 +64,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Checkerboard divider */}
-      <div className="h-4 checkerboard" />
+      {/* Large Checkerboard divider */}
+      <div className="h-16 checkerboard-lg" />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
@@ -99,13 +99,17 @@ export default function Home() {
         )}
       </main>
 
+      {/* Checkerboard divider before footer */}
+      <div className="h-16 checkerboard-lg mt-12" />
+
       {/* Footer */}
-      <footer className="bg-black text-white border-t-4 border-red-600 mt-12">
-        <div className="max-w-6xl mx-auto px-4 py-6 text-center">
-          <div className="flex items-center justify-center gap-2 text-sm">
-            <ChefHat size={20} className="text-red-600" />
-            <span>Meal Finder - Your personal recipe library</span>
+      <footer className="bg-black text-white py-8">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-2">
+            <ChefHat size={24} className="text-red-600" />
+            <span className="text-lg font-semibold">Meal Finder</span>
           </div>
+          <p className="text-gray-400 mt-2">Your personal recipe library</p>
         </div>
       </footer>
     </div>

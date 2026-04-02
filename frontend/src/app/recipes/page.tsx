@@ -44,12 +44,17 @@ export default function RecipesPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white">
-        <div className="h-2 checkerboard" />
+        {/* Hero Section */}
+        <div className="bg-black text-white py-12 relative overflow-hidden">
+          <div className="absolute inset-0 checkerboard-lg-dark opacity-20" />
+          <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+            <ChefHat size={48} className="text-red-600 mx-auto mb-4" />
+            <h1 className="text-4xl font-bold tracking-tight">All Recipes</h1>
+            <p className="text-gray-300 mt-2">Explore our collection of delicious recipes</p>
+          </div>
+        </div>
+        <div className="h-12 checkerboard-lg" />
         <main className="max-w-6xl mx-auto px-4 py-8">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-            <ChefHat size={28} className="text-red-600" />
-            All Recipes
-          </h1>
           <LoadingSpinner message="Loading recipes from server..." />
         </main>
       </div>
@@ -60,12 +65,17 @@ export default function RecipesPage() {
   if (isError) {
     return (
       <div className="min-h-screen bg-white">
-        <div className="h-2 checkerboard" />
+        {/* Hero Section */}
+        <div className="bg-black text-white py-12 relative overflow-hidden">
+          <div className="absolute inset-0 checkerboard-lg-dark opacity-20" />
+          <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+            <ChefHat size={48} className="text-red-600 mx-auto mb-4" />
+            <h1 className="text-4xl font-bold tracking-tight">All Recipes</h1>
+            <p className="text-gray-300 mt-2">Explore our collection of delicious recipes</p>
+          </div>
+        </div>
+        <div className="h-12 checkerboard-lg" />
         <main className="max-w-6xl mx-auto px-4 py-8">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-            <ChefHat size={28} className="text-red-600" />
-            All Recipes
-          </h1>
           <div className="text-center py-8 bg-orange-50 border-2 border-orange-200 rounded-xl mb-6">
             <ChefHat size={48} className="text-orange-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Oops! Kitchen's temporarily closed</h3>
@@ -104,20 +114,32 @@ export default function RecipesPage() {
   // Success state
   return (
     <div className="min-h-screen bg-white">
-      {/* Checkerboard accent */}
-      <div className="h-2 checkerboard" />
+      {/* Hero Section */}
+      <div className="bg-black text-white py-12 relative overflow-hidden">
+        <div className="absolute inset-0 checkerboard-lg-dark opacity-20" />
+        <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+          <ChefHat size={48} className="text-red-600 mx-auto mb-4" />
+          <h1 className="text-4xl font-bold tracking-tight">All Recipes</h1>
+          <p className="text-gray-300 mt-2">Explore our collection of delicious recipes</p>
+        </div>
+      </div>
+
+      {/* Checkerboard divider */}
+      <div className="h-12 checkerboard-lg" />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-            <ChefHat size={28} className="text-red-600" />
-            All Recipes
-          </h1>
-          <span className="text-gray-500">
+          <span className="text-lg font-medium text-gray-700">
             {filteredRecipes.length} {filteredRecipes.length === 1 ? 'recipe' : 'recipes'}
             {selectedCuisine !== 'all' && ` in ${selectedCuisine}`}
           </span>
+          <Link
+            href="/recipes/new"
+            className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition"
+          >
+            + Add Recipe
+          </Link>
         </div>
 
         {/* Cuisine Filter */}
