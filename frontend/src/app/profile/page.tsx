@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/types';
 import { LoadingSpinner, ErrorMessage, ChefHat } from '@/components';
-import { API_BASE } from '@/lib/api';
+import { API_BASE } from '@/lib/api/recipes';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);

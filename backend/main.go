@@ -116,6 +116,7 @@ func main() {
 		protected.GET("/recipes/top", recipeHandler.GetRecipesSortedByRating)
 		protected.POST("/recipes/:id/rating", ratingHandler.CreateRating)
 		protected.DELETE("/recipes/:id/rating", ratingHandler.DeleteRating)
+		protected.GET("/ratings", ratingHandler.GetUserRatings)
 		protected.GET("/suggestions", suggestionHandler.GetSuggestions)
 	} else {
 		// Mock mode: use in-memory handlers for testing

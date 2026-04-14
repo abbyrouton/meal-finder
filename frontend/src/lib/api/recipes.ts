@@ -1,4 +1,4 @@
-import { Recipe, RecipeDetail } from '@/types';
+import { Recipe, RecipeDetail, UserRating } from '@/types';
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -136,12 +136,12 @@ export async function getPublicRecipe(id: string): Promise<RecipeDetail> {
   return handleResponse<RecipeDetail>(response);
 }
 
-// POST /api/recipes/:id/rate - Rate a recipe
+// POST /api/recipes/:id/rating - Rate a recipe
 export async function rateRecipe(id: string, rating: number): Promise<void> {
-  const response = await fetch(`${API_BASE}/recipes/${id}/rate`, {
+  const response = await fetch(`${API_BASE}/recipes/${id}/rating`, {
     method: 'POST',
     headers: getAuthHeaders(),
-    body: JSON.stringify({ rating }),
+    body: JSON.stringify({ score: rating }),
   });
 
   if (!response.ok) {
@@ -152,4 +152,13 @@ export async function rateRecipe(id: string, rating: number): Promise<void> {
       response.statusText
     );
   }
+}
+
+// GET /api/ratings - Get user's ratings
+export async function getUserRatings(): Promise<UserRating[]> {
+  const response = await fetch(`${API_BASE}/ratings`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  return handleResponse<UserRating[]>(response);
 }

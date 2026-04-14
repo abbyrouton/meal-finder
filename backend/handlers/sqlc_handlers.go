@@ -254,6 +254,34 @@ func (h *SqlcRatingHandler) DeleteRating(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Rating deleted"})
 }
 
+func (h *SqlcRatingHandler) GetUserRatings(c *gin.Context) {
+	userID := c.GetString("userID")
+
+	ratings, err := h.queries.GetUserRatings(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch ratings"})
+		return
+	}
+
+	// Convert to response format
+	response := make([]gin.H, len(ratings))
+	for i, r := range ratings {
+		response[i] = gin.H{
+			"id":                  r.ID,
+			"user_id":             r.UserID,
+			"recipe_id":           r.RecipeID,
+			"score":               r.Score,
+			"notes":               nullStringToPtr(r.Notes),
+			"created_at":          r.CreatedAt.Time,
+			"recipe_title":        r.RecipeTitle,
+			"recipe_cuisine_type": nullStringToPtr(r.RecipeCuisineType),
+			"recipe_prep_time":    nullInt32ToPtr(r.RecipePrepTime),
+		}
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
 // SqlcSuggestionHandler uses sqlc generated queries
 type SqlcSuggestionHandler struct {
 	queries *sqlc.Queries

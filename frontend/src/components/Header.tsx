@@ -119,6 +119,17 @@ export function Header() {
                 >
                   My Recipes
                 </Link>
+                <Link
+                  href="/my-ratings"
+                  aria-current={isActive('/my-ratings') ? 'page' : undefined}
+                  className={`text-sm font-medium transition rounded px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                    isActive('/my-ratings')
+                      ? 'text-red-500'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  My Ratings
+                </Link>
               </>
             )}
           </nav>
@@ -217,6 +228,15 @@ export function Header() {
                 }`}
               >
                 My Recipes
+              </Link>
+              <Link
+                href="/my-ratings"
+                aria-current={isActive('/my-ratings') ? 'page' : undefined}
+                className={`text-sm font-medium whitespace-nowrap transition rounded px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                  isActive('/my-ratings') ? 'text-red-500' : 'text-gray-300'
+                }`}
+              >
+                My Ratings
               </Link>
             </>
           )}

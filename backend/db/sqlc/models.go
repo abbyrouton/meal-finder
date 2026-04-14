@@ -37,9 +37,11 @@ type Recipe struct {
 }
 
 type User struct {
-	ID        string         `json:"id"`
-	Email     string         `json:"email"`
-	Name      sql.NullString `json:"name"`
-	AvatarUrl sql.NullString `json:"avatar_url"`
-	CreatedAt sql.NullTime   `json:"created_at"`
+	ID           string         `json:"id"`
+	Email        string         `json:"email"`
+	Name         sql.NullString `json:"name"`
+	AvatarUrl    sql.NullString `json:"avatar_url"`
+	CreatedAt    sql.NullTime   `json:"created_at"`
+	PasswordHash sql.NullString `json:"password_hash"`
+	Role         sql.NullString `json:"role"`
 }

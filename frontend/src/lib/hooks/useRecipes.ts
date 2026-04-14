@@ -8,6 +8,7 @@ import {
   getPublicRecipes,
   getPublicRecipe,
   rateRecipe,
+  getUserRatings,
   CreateRecipeData,
   UpdateRecipeData,
   ApiError,
@@ -129,7 +130,18 @@ export function useRateRecipe() {
       queryClient.invalidateQueries({ queryKey: recipeKeys.detail(id) });
       // Invalidate the list to update ratings there too
       queryClient.invalidateQueries({ queryKey: recipeKeys.lists() });
+      // Invalidate user ratings
+      queryClient.invalidateQueries({ queryKey: ['userRatings'] });
     },
+  });
+}
+
+// GET /api/ratings - Get user's ratings
+export function useUserRatings() {
+  return useQuery({
+    queryKey: ['userRatings'],
+    queryFn: getUserRatings,
+    retry: 1,
   });
 }
 

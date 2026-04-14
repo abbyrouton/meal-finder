@@ -7,6 +7,15 @@ ON DUPLICATE KEY UPDATE score = VALUES(score), notes = VALUES(notes);
 DELETE FROM ratings
 WHERE recipe_id = ? AND user_id = ?;
 
+-- name: GetUserRatings :many
+SELECT
+  rt.id, rt.user_id, rt.recipe_id, rt.score, rt.notes, rt.created_at,
+  r.title as recipe_title, r.cuisine_type as recipe_cuisine_type, r.prep_time as recipe_prep_time
+FROM ratings rt
+JOIN recipes r ON rt.recipe_id = r.id
+WHERE rt.user_id = ?
+ORDER BY rt.created_at DESC;
+
 -- name: GetRecipesByUserSortedByRating :many
 SELECT r.*, COALESCE(rt.score, 0) AS rating_score
 FROM recipes r

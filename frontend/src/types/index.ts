@@ -27,3 +27,15 @@ export interface LoginResponse {
   token: string;
   user: User;
 }
+
+export interface UserRating {
+  id: string;
+  user_id: string;
+  recipe_id: string;
+  score: number;
+  notes: string | null;
+  created_at: string;
+  recipe_title: string;
+  recipe_cuisine_type: string | null;
+  recipe_prep_time: number | null;
+}

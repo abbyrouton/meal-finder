@@ -142,6 +142,61 @@ func (q *Queries) GetSuggestions(ctx context.Context, arg GetSuggestionsParams) 
 	return items, nil
 }
 
+const getUserRatings = `-- name: GetUserRatings :many
+SELECT
+  rt.id, rt.user_id, rt.recipe_id, rt.score, rt.notes, rt.created_at,
+  r.title as recipe_title, r.cuisine_type as recipe_cuisine_type, r.prep_time as recipe_prep_time
+FROM ratings rt
+JOIN recipes r ON rt.recipe_id = r.id
+WHERE rt.user_id = ?
+ORDER BY rt.created_at DESC
+`
+
+type GetUserRatingsRow struct {
+	ID                string         `json:"id"`
+	UserID            string         `json:"user_id"`
+	RecipeID          string         `json:"recipe_id"`
+	Score             int32          `json:"score"`
+	Notes             sql.NullString `json:"notes"`
+	CreatedAt         sql.NullTime   `json:"created_at"`
+	RecipeTitle       string         `json:"recipe_title"`
+	RecipeCuisineType sql.NullString `json:"recipe_cuisine_type"`
+	RecipePrepTime    sql.NullInt32  `json:"recipe_prep_time"`
+}
+
+func (q *Queries) GetUserRatings(ctx context.Context, userID string) ([]GetUserRatingsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserRatings, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetUserRatingsRow{}
+	for rows.Next() {
+		var i GetUserRatingsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.RecipeID,
+			&i.Score,
+			&i.Notes,
+			&i.CreatedAt,
+			&i.RecipeTitle,
+			&i.RecipeCuisineType,
+			&i.RecipePrepTime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const upsertRating = `-- name: UpsertRating :exec
 INSERT INTO ratings (id, user_id, recipe_id, score, notes)
 VALUES (UUID(), ?, ?, ?, ?)
