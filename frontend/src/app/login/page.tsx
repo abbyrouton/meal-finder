@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChefHat } from '@/components';
-import { API_BASE } from '@/lib/api';
+import { API_BASE } from '@/lib/api/recipes';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -50,29 +50,32 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen">
-      {/* Left side - Decorative */}
-      <div className="hidden lg:flex lg:w-1/2 bg-black items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 checkerboard-dark opacity-30" />
-        <div className="relative z-10 text-center p-8">
-          <ChefHat size={120} className="text-red-600 mx-auto mb-6" />
-          <h1 className="text-4xl font-bold text-white mb-4">Meal Finder</h1>
-          <p className="text-gray-400 text-lg">Your personal recipe library</p>
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <div className="bg-black text-white py-12 relative overflow-hidden">
+        <div className="absolute inset-0 checkerboard-lg-dark opacity-20" />
+        <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+          <ChefHat size={48} className="text-red-600 mx-auto mb-4" />
+          <h1 className="text-4xl font-bold tracking-tight">Sign In</h1>
+          <p className="text-gray-300 mt-2">Welcome back to Meal Finder</p>
         </div>
       </div>
 
-      {/* Right side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center bg-white p-8">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8 lg:hidden">
-            <Link href="/" className="inline-flex items-center gap-2">
-              <ChefHat size={40} className="text-red-600" />
-              <span className="text-3xl font-bold text-black">Meal Finder</span>
-            </Link>
-          </div>
+      {/* Checkerboard divider */}
+      <div className="h-12 checkerboard-lg" />
 
+      {/* Main Content */}
+      <main className="max-w-md mx-auto px-4 py-8">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 mb-8 px-4 py-2 text-red-600 hover:text-red-700 font-medium text-lg border-2 border-red-600 hover:border-red-700 rounded-lg transition"
+        >
+          &larr; Back to Home
+        </Link>
+
+        <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h2>
-          <p className="text-gray-500 mb-8">Sign in to your account</p>
+          <p className="text-gray-500 mb-6">Sign in to your account</p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
@@ -131,14 +134,8 @@ export default function LoginPage() {
             <p>Test credentials:</p>
             <p className="font-mono text-xs mt-1">test@mealfinder.com / password123</p>
           </div>
-
-          <div className="mt-6 text-center">
-            <Link href="/" className="text-gray-500 hover:text-gray-700 text-sm">
-              ← Back to Home
-            </Link>
-          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
