@@ -1,7 +1,6 @@
-import { Recipe } from '@/types';
-import { RecipeDetail } from '@/lib/placeholder-data';
+import { Recipe, RecipeDetail } from '@/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 // Error class for API errors
 export class ApiError extends Error {

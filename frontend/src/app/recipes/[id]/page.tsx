@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { RecipeDetail } from '@/types';
 import { StarRating, LoadingSpinner, ChefHat } from '@/components';
-import { getPlaceholderRecipe, RecipeDetail } from '@/lib/placeholder-data';
+import { getPlaceholderRecipe } from '@/lib/placeholder-data';
 import { getLocalRecipe, deleteLocalRecipe } from '@/lib/local-recipes';
 import { usePublicRecipe, useDeleteRecipe, useRateRecipe } from '@/lib/hooks/useRecipes';
 
@@ -18,6 +19,13 @@ export default function RecipeDetailPage() {
   const [isPlaceholder, setIsPlaceholder] = useState(false);
   const [userRating, setUserRating] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Check auth status
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, []);
 
   // Fetch from API using TanStack Query (only for non-local, non-placeholder)
   const {
@@ -189,14 +197,14 @@ export default function RecipeDetailPage() {
                 <ChefHat size={36} className="text-red-600" />
                 {recipe.title}
               </h1>
-              <div className="flex gap-2">
-                <Link
-                  href={`/recipes/${recipe.id}/edit`}
-                  className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-                >
-                  Edit
-                </Link>
-                {!isPlaceholder && (
+              {isLoggedIn && !isPlaceholder && (
+                <div className="flex gap-2">
+                  <Link
+                    href={`/recipes/${recipe.id}/edit`}
+                    className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                  >
+                    Edit
+                  </Link>
                   <button
                     onClick={handleDelete}
                     disabled={deleteRecipeMutation.isPending}
@@ -204,8 +212,8 @@ export default function RecipeDetailPage() {
                   >
                     {deleteRecipeMutation.isPending ? 'Deleting...' : 'Delete'}
                   </button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             {/* Meta Info */}
@@ -287,8 +295,8 @@ export default function RecipeDetailPage() {
               </div>
             )}
 
-            {/* Rate This Recipe */}
-            {!isPlaceholder && (
+            {/* Rate This Recipe - only for logged in users */}
+            {!isPlaceholder && isLoggedIn && (
               <div className="border-t-2 border-gray-200 pt-6 mt-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">Rate this recipe</h2>
                 <div className="flex items-center gap-2">
@@ -308,6 +316,18 @@ export default function RecipeDetailPage() {
                     <span className="ml-2 text-gray-500">You rated: {userRating} stars</span>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* Sign in prompt for guests */}
+            {!isPlaceholder && !isLoggedIn && (
+              <div className="border-t-2 border-gray-200 pt-6 mt-6">
+                <p className="text-gray-500 text-sm">
+                  <Link href="/login" className="text-red-600 hover:text-red-700 font-medium">
+                    Sign in
+                  </Link>
+                  {' '}to rate this recipe or add it to your collection.
+                </p>
               </div>
             )}
           </div>

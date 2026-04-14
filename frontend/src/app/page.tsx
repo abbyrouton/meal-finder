@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Recipe } from '@/types';
 import { RecipeCard, LoadingSpinner, ChefHat } from '@/components';
-import { fetchPublicRecipes } from '@/lib/api';
+import { getPublicRecipes } from '@/lib/api';
 import { placeholderRecipes } from '@/lib/placeholder-data';
 import { getLocalRecipes } from '@/lib/local-recipes';
 
@@ -18,14 +18,9 @@ export default function Home() {
 
   const loadRecipes = async () => {
     try {
-      const data = await fetchPublicRecipes();
-      if (data.length > 0) {
-        const localRecipes = getLocalRecipes();
-        setRecipes([...localRecipes, ...data]);
-      } else {
-        const localRecipes = getLocalRecipes();
-        setRecipes([...localRecipes, ...placeholderRecipes]);
-      }
+      const localRecipes = getLocalRecipes();
+      const data = await getPublicRecipes();
+      setRecipes(data.length > 0 ? [...localRecipes, ...data] : [...localRecipes, ...placeholderRecipes]);
     } catch {
       const localRecipes = getLocalRecipes();
       setRecipes([...localRecipes, ...placeholderRecipes]);

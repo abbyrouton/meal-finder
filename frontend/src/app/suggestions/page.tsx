@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Recipe } from '@/types';
-import { RecipeCard, LoadingSpinner, ChefHat, EmptyState } from '@/components';
+import { RecipeCard, LoadingSpinner, ChefHat } from '@/components';
 import { placeholderRecipes, topCuisines } from '@/lib/placeholder-data';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+import { API_BASE } from '@/lib/api';
 
 interface SuggestionData {
   top_cuisines: string[];

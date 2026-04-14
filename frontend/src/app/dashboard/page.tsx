@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Recipe } from '@/types';
 import { RecipeCard, LoadingSpinner, ErrorMessage, ChefHat, EmptyState } from '@/components';
-import { fetchUserRecipes } from '@/lib/api';
+import { getRecipes } from '@/lib/api';
 import { placeholderRecipes } from '@/lib/placeholder-data';
 
 export default function DashboardPage() {
@@ -26,7 +26,7 @@ export default function DashboardPage() {
 
   const loadRecipes = async () => {
     try {
-      const data = await fetchUserRecipes();
+      const data = await getRecipes();
       if (data.length === 0) {
         setRecipes(placeholderRecipes.slice(0, 3));
         setUsingPlaceholder(true);

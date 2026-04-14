@@ -3,10 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Recipe } from '@/types';
-import { LoadingSpinner, ChefHat, EmptyState } from '@/components';
+import { LoadingSpinner, ChefHat } from '@/components';
 import { placeholderRecipes } from '@/lib/placeholder-data';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+import { API_BASE } from '@/lib/api';
 
 export default function TopRecipesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);

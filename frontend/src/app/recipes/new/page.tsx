@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+export const dynamic = 'force-dynamic';
+
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -21,7 +23,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useCreateRecipe } from '@/lib/hooks/useRecipes';
-import { saveLocalRecipe } from '@/lib/local-recipes';
 
 const recipeFormSchema = z.object({
   title: z
@@ -47,6 +48,13 @@ type RecipeFormValues = z.infer<typeof recipeFormSchema>;
 export default function NewRecipePage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  // Check authentication status
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, []);
 
   // TanStack Query mutation hook
   const createRecipeMutation = useCreateRecipe({
@@ -75,40 +83,70 @@ export default function NewRecipePage() {
 
   const onSubmit = async (data: RecipeFormValues) => {
     setError(null);
-    const token = localStorage.getItem('token');
     const prepTimeNum = data.prep_time ? parseInt(data.prep_time, 10) : null;
 
-    if (token) {
-      // User is logged in - use mutation to POST to API
-      createRecipeMutation.mutate({
-        title: data.title,
-        description: data.description || null,
-        cuisine_type: data.cuisine_type || null,
-        prep_time: prepTimeNum,
-        ingredients: data.ingredients || null,
-        steps: data.steps || null,
-        notes: data.notes || null,
-      });
-    } else {
-      // User not logged in - save locally
-      try {
-        const newRecipe = saveLocalRecipe({
-          title: data.title,
-          description: data.description || null,
-          cuisine_type: data.cuisine_type || null,
-          prep_time: prepTimeNum,
-          ingredients: data.ingredients || '',
-          steps: data.steps || '',
-          notes: data.notes || '',
-        });
-        router.push(`/recipes/${newRecipe.id}`);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to save recipe locally');
-      }
-    }
+    createRecipeMutation.mutate({
+      title: data.title,
+      description: data.description || null,
+      cuisine_type: data.cuisine_type || null,
+      prep_time: prepTimeNum,
+      ingredients: data.ingredients || null,
+      steps: data.steps || null,
+      notes: data.notes || null,
+    });
   };
 
   const isSubmitting = form.formState.isSubmitting || createRecipeMutation.isPending;
+
+  // Show auth required message if not logged in
+  if (isLoggedIn === false) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="bg-black text-white py-12 relative overflow-hidden">
+          <div className="absolute inset-0 checkerboard-lg-dark opacity-20" />
+          <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+            <ChefHat size={48} className="text-red-600 mx-auto mb-4" />
+            <h1 className="text-4xl font-bold tracking-tight">Add New Recipe</h1>
+          </div>
+        </div>
+        <div className="h-12 checkerboard-lg" />
+        <main className="max-w-2xl mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <ChefHat size={48} className="text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Sign in required</h2>
+            <p className="text-gray-500 mb-6">You must be signed in to add new recipes.</p>
+            <Link
+              href="/login"
+              className="inline-block px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition"
+            >
+              Sign In
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Still checking auth status
+  if (isLoggedIn === null) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="bg-black text-white py-12 relative overflow-hidden">
+          <div className="absolute inset-0 checkerboard-lg-dark opacity-20" />
+          <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+            <ChefHat size={48} className="text-red-600 mx-auto mb-4" />
+            <h1 className="text-4xl font-bold tracking-tight">Add New Recipe</h1>
+          </div>
+        </div>
+        <div className="h-12 checkerboard-lg" />
+        <main className="max-w-2xl mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <div className="animate-spin h-8 w-8 border-4 border-red-600 border-t-transparent rounded-full mx-auto" />
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">

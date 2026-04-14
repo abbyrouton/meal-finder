@@ -1,12 +1,4 @@
-import { Recipe } from '@/types';
-
-export interface RecipeDetail extends Recipe {
-  ingredients: string;
-  steps: string;
-  notes: string;
-  user_id: string;
-  created_at: string;
-}
+import { RecipeDetail } from '@/types';
 
 export const placeholderRecipes: RecipeDetail[] = [
   {

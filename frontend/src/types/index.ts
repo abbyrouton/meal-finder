@@ -8,6 +8,14 @@ export interface Recipe {
   avg_rating?: number;
 }
 
+export interface RecipeDetail extends Recipe {
+  ingredients: string;
+  steps: string;
+  notes: string;
+  user_id: string;
+  created_at: string;
+}
+
 export interface User {
   id: string;
   email: string;

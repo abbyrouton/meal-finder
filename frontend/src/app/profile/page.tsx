@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/types';
 import { LoadingSpinner, ErrorMessage, ChefHat } from '@/components';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+import { API_BASE } from '@/lib/api';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);

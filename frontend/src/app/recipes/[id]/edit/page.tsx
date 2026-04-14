@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -54,6 +56,13 @@ export default function EditRecipePage() {
   const [isLocalRecipe, setIsLocalRecipe] = useState(false);
   const [isPlaceholder, setIsPlaceholder] = useState(false);
   const [localDataLoaded, setLocalDataLoaded] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  // Check authentication status
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, []);
 
   // Fetch recipe from API using TanStack Query
   const {
@@ -186,7 +195,37 @@ export default function EditRecipePage() {
   // Loading state
   const isLoading = isLoadingApi && !isLocalRecipe && !isPlaceholder && !localDataLoaded;
 
-  if (isLoading) {
+  // Show auth required message if not logged in
+  if (isLoggedIn === false) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="bg-black text-white py-12 relative overflow-hidden">
+          <div className="absolute inset-0 checkerboard-lg-dark opacity-20" />
+          <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+            <ChefHat size={48} className="text-red-600 mx-auto mb-4" />
+            <h1 className="text-4xl font-bold tracking-tight">Edit Recipe</h1>
+          </div>
+        </div>
+        <div className="h-12 checkerboard-lg" />
+        <main className="max-w-2xl mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <ChefHat size={48} className="text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Sign in required</h2>
+            <p className="text-gray-500 mb-6">You must be signed in to edit or delete recipes.</p>
+            <Link
+              href="/login"
+              className="inline-block px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition"
+            >
+              Sign In
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Still checking auth status
+  if (isLoggedIn === null || isLoading) {
     return (
       <div className="min-h-screen bg-white">
         {/* Hero Section */}
