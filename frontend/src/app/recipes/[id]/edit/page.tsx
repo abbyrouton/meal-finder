@@ -22,7 +22,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useRecipe, useUpdateRecipe } from '@/lib/hooks/useRecipes';
+import { usePublicRecipe, useUpdateRecipe } from '@/lib/hooks/useRecipes';
 import { getPlaceholderRecipe } from '@/lib/placeholder-data';
 import { getLocalRecipe, updateLocalRecipe } from '@/lib/local-recipes';
 
@@ -64,12 +64,12 @@ export default function EditRecipePage() {
     setIsLoggedIn(!!token);
   }, []);
 
-  // Fetch recipe from API using TanStack Query
+  // Fetch recipe from public API (any recipe can be loaded for editing UI)
   const {
     data: apiRecipe,
     isLoading: isLoadingApi,
     isError: isApiError,
-  } = useRecipe(recipeId);
+  } = usePublicRecipe(recipeId);
 
   // Update mutation hook
   const updateRecipeMutation = useUpdateRecipe();
