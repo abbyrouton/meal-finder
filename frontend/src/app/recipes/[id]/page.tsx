@@ -20,11 +20,21 @@ export default function RecipeDetailPage() {
   const [userRating, setUserRating] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  // Check auth status
+  // Check auth status and get current user
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
     setIsLoggedIn(!!token);
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setCurrentUserId(user.id);
+      } catch {
+        setCurrentUserId(null);
+      }
+    }
   }, []);
 
   // Fetch from API using TanStack Query (only for non-local, non-placeholder)
@@ -58,6 +68,9 @@ export default function RecipeDetailPage() {
   // Determine which recipe to show
   const recipe = isLocalRecipe || isPlaceholder ? localRecipe : apiRecipe;
   const isLoading = !isLocalRecipe && !isPlaceholder && isLoadingApi;
+
+  // Check if current user owns this recipe
+  const isOwner = isLocalRecipe || (recipe && currentUserId && recipe.user_id === currentUserId);
 
   const handleRate = async (rating: number) => {
     setUserRating(rating);
@@ -197,7 +210,7 @@ export default function RecipeDetailPage() {
                 <ChefHat size={36} className="text-red-600" />
                 {recipe.title}
               </h1>
-              {isLoggedIn && !isPlaceholder && (
+              {isOwner && !isPlaceholder && (
                 <div className="flex gap-2">
                   <Link
                     href={`/recipes/${recipe.id}/edit`}

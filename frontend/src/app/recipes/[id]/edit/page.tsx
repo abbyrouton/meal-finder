@@ -57,11 +57,21 @@ export default function EditRecipePage() {
   const [isPlaceholder, setIsPlaceholder] = useState(false);
   const [localDataLoaded, setLocalDataLoaded] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  // Check authentication status
+  // Check authentication status and get current user
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
     setIsLoggedIn(!!token);
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setCurrentUserId(user.id);
+      } catch {
+        setCurrentUserId(null);
+      }
+    }
   }, []);
 
   // Fetch recipe from public API (any recipe can be loaded for editing UI)
@@ -240,6 +250,38 @@ export default function EditRecipePage() {
         <div className="h-12 checkerboard-lg" />
         <main className="max-w-2xl mx-auto px-4 py-8">
           <LoadingSpinner message="Loading recipe..." />
+        </main>
+      </div>
+    );
+  }
+
+  // Check ownership for API recipes (local recipes are always owned by current user)
+  const isOwner = isLocalRecipe || (apiRecipe && currentUserId && apiRecipe.user_id === currentUserId);
+
+  // Show permission denied message if user doesn't own this recipe
+  if (apiRecipe && !isLocalRecipe && !isPlaceholder && !isOwner) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="bg-black text-white py-12 relative overflow-hidden">
+          <div className="absolute inset-0 checkerboard-lg-dark opacity-20" />
+          <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+            <ChefHat size={48} className="text-red-600 mx-auto mb-4" />
+            <h1 className="text-4xl font-bold tracking-tight">Edit Recipe</h1>
+          </div>
+        </div>
+        <div className="h-12 checkerboard-lg" />
+        <main className="max-w-2xl mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <ChefHat size={48} className="text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Permission denied</h2>
+            <p className="text-gray-500 mb-6">You can only edit your own recipes.</p>
+            <Link
+              href={`/recipes/${recipeId}`}
+              className="inline-block px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition"
+            >
+              View Recipe
+            </Link>
+          </div>
         </main>
       </div>
     );
